@@ -4,6 +4,12 @@ namespace Josefo727\FilamentGeneralSettings;
 
 class FilamentGeneralSettings
 {
+    protected string $modelClass;
+
+    public function __construct()
+    {
+        $this->modelClass = config('filament-general-settings.model', \Josefo727\FilamentGeneralSettings\Models\GeneralSetting::class);
+    }
     /**
      * Get a setting value by name.
      *
@@ -13,9 +19,7 @@ class FilamentGeneralSettings
      */
     public function get(string $name, $default = null)
     {
-        $model = config('filament-general-settings.model', \Josefo727\FilamentGeneralSettings\Models\GeneralSetting::class);
-        
-        return $model::getValue($name) ?? $default;
+        return $this->modelClass::getValue($name) ?? $default;
     }
 
     /**
@@ -29,19 +33,17 @@ class FilamentGeneralSettings
      */
     public function set(string $name, $value, ?string $type = 'string', ?string $description = null)
     {
-        $model = config('filament-general-settings.model', \Josefo727\FilamentGeneralSettings\Models\GeneralSetting::class);
-        
-        $setting = $model::query()->firstWhere('name', $name);
+        $setting = $this->modelClass::query()->firstWhere('name', $name);
         
         if ($setting) {
-            return $model::updateSetting($setting, [
+            return $this->modelClass::updateSetting($setting, [
                 'value' => $value,
                 'type' => $type,
                 'description' => $description ?? $setting->description,
             ]);
         }
         
-        return $model::create([
+        return $this->modelClass::create([
             'name' => $name,
             'value' => $value,
             'type' => $type,
@@ -57,9 +59,7 @@ class FilamentGeneralSettings
      */
     public function has(string $name): bool
     {
-        $model = config('filament-general-settings.model', \Josefo727\FilamentGeneralSettings\Models\GeneralSetting::class);
-        
-        return $model::query()->where('name', $name)->exists();
+        return $this->modelClass::query()->where('name', $name)->exists();
     }
 
     /**
@@ -70,9 +70,7 @@ class FilamentGeneralSettings
      */
     public function remove(string $name): bool
     {
-        $model = config('filament-general-settings.model', \Josefo727\FilamentGeneralSettings\Models\GeneralSetting::class);
-        
-        $setting = $model::query()->firstWhere('name', $name);
+        $setting = $this->modelClass::query()->firstWhere('name', $name);
         
         if ($setting) {
             return $setting->delete();

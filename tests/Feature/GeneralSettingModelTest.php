@@ -31,7 +31,7 @@ class GeneralSettingModelTest extends TestCase
             'type' => 'string',
         ]);
 
-        $this->assertDatabaseHas(GeneralSetting::getTableName(), [
+        $this->assertDatabaseHas(\Josefo727\FilamentGeneralSettings\FilamentGeneralSettingsServiceProvider::getTableName(), [
             'name' => 'test_setting',
             'value' => 'test_value',
             'description' => 'Test setting description',
@@ -59,7 +59,7 @@ class GeneralSettingModelTest extends TestCase
             'description' => 'Updated description',
         ]);
 
-        $this->assertDatabaseHas(GeneralSetting::getTableName(), [
+        $this->assertDatabaseHas(\Josefo727\FilamentGeneralSettings\FilamentGeneralSettingsServiceProvider::getTableName(), [
             'name' => 'test_setting',
             'value' => 'updated_value',
             'description' => 'Updated description',
@@ -79,7 +79,7 @@ class GeneralSettingModelTest extends TestCase
 
         $setting->delete();
 
-        $this->assertDatabaseMissing(GeneralSetting::getTableName(), [
+        $this->assertDatabaseMissing(\Josefo727\FilamentGeneralSettings\FilamentGeneralSettingsServiceProvider::getTableName(), [
             'name' => 'test_setting',
         ]);
     }

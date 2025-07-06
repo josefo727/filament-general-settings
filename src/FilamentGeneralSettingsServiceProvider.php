@@ -2,18 +2,8 @@
 
 namespace Josefo727\FilamentGeneralSettings;
 
-use Filament\Support\Assets\AlpineComponent;
-use Filament\Support\Assets\Asset;
-use Filament\Support\Assets\Css;
-use Filament\Support\Assets\Js;
-use Filament\Support\Facades\FilamentAsset;
-use Filament\Support\Facades\FilamentIcon;
-use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Josefo727\FilamentGeneralSettings\Commands\InstallCommand;
-use Josefo727\FilamentGeneralSettings\Testing\TestsFilamentGeneralSettings;
-use Livewire\Features\SupportTesting\Testable;
 
 class FilamentGeneralSettingsServiceProvider extends ServiceProvider
 {

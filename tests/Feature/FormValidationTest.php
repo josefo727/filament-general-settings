@@ -341,7 +341,7 @@ class FormValidationTest extends TestCase
             ]);
 
             // Verificar que se creó correctamente
-            $this->assertDatabaseHas(GeneralSetting::getTableName(), [
+            $this->assertDatabaseHas(\Josefo727\FilamentGeneralSettings\FilamentGeneralSettingsServiceProvider::getTableName(), [
                 'name' => 'test_' . $type,
                 'type' => $type,
             ]);
@@ -471,7 +471,7 @@ class FormValidationTest extends TestCase
             'description' => 'Test description',
         ]);
 
-        $this->assertDatabaseHas(GeneralSetting::getTableName(), [
+        $this->assertDatabaseHas(\Josefo727\FilamentGeneralSettings\FilamentGeneralSettingsServiceProvider::getTableName(), [
             'name' => 'test_boolean_valid',
             'type' => 'boolean',
         ]);

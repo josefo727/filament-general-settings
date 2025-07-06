@@ -32,19 +32,9 @@ class GeneralSetting extends Model
      *
      * @return string
      */
-    public static function getTableName(): string
-    {
-        return FilamentGeneralSettingsServiceProvider::getTableName();
-    }
-
-    /**
-     * Get the table associated with the model.
-     *
-     * @return string
-     */
     public function getTable(): string
     {
-        return static::getTableName();
+        return FilamentGeneralSettingsServiceProvider::getTableName();
     }
 
     protected static function boot(): void
@@ -71,7 +61,7 @@ class GeneralSetting extends Model
     {
         $dataType = new DataTypeService();
         $rules = $dataType->getValidationRule($type) ?: 'required';
-        $tableName = static::getTableName();
+        $tableName = FilamentGeneralSettingsServiceProvider::getTableName();
 
         return [
             'name' => 'required|string|unique:' . $tableName . ',name,' . $id,
@@ -87,7 +77,7 @@ class GeneralSetting extends Model
      * @return GeneralSetting
      * @param array<string,mixed> $attributes
      */
-    public static function create(array $attributes = []): GeneralSetting
+    private static function prepareAttributesForSaving(array $attributes, ?int $id = null): array
     {
         if (isset($attributes['type']) && in_array($attributes['type'], ['emails', 'array']) && isset($attributes['value'])) {
             $value = preg_replace('/\s+/', ' ', $attributes['value']);
@@ -97,8 +87,21 @@ class GeneralSetting extends Model
         // Validate data
         Validator::make(
             $attributes,
-            self::getValidationRules($attributes['type'] ?? null)
+            self::getValidationRules($attributes['type'] ?? null, $id)
         )->validate();
+
+        return $attributes;
+    }
+
+    /**
+     * Create a new setting.
+     *
+     * @return GeneralSetting
+     * @param array<string,mixed> $attributes
+     */
+    public static function create(array $attributes = []): GeneralSetting
+    {
+        $attributes = self::prepareAttributesForSaving($attributes);
 
         // Creates the object and saves the data
         $setting = new static($attributes);
@@ -117,16 +120,7 @@ class GeneralSetting extends Model
      */
     public static function updateSetting(GeneralSetting $setting, array $attributes = [], array $options = []): GeneralSetting
     {
-        if (isset($attributes['type']) && in_array($attributes['type'], ['emails', 'array']) && isset($attributes['value'])) {
-            $value = preg_replace('/\s+/', ' ', $attributes['value']);
-            $attributes['value'] = preg_replace('/\s*,\s*/', ',', $value);
-        }
-        
-        // Validate data
-        Validator::make(
-            $attributes,
-            self::getValidationRules($attributes['type'] ?? null, $setting->id)
-        )->validate();
+        $attributes = self::prepareAttributesForSaving($attributes, $setting->id);
 
         $setting->fill($attributes)->save($options);
 

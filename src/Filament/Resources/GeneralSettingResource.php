@@ -2,13 +2,9 @@
 
 namespace Josefo727\FilamentGeneralSettings\Filament\Resources;
 
-use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Josefo727\FilamentGeneralSettings\Filament\Resources\GeneralSettingResource\Pages;
 use Josefo727\FilamentGeneralSettings\Models\GeneralSetting;
 use Josefo727\FilamentGeneralSettings\Services\DataTypeService;
 
@@ -51,7 +47,7 @@ class GeneralSettingResource extends Resource
                             ->label(__('filament-general-settings::general.fields.name'))
                             ->placeholder(__('filament-general-settings::general.placeholders.name'))
                             ->required()
-                            ->unique(GeneralSetting::getTableName(), 'name', true)
+                            ->unique(\Josefo727\FilamentGeneralSettings\FilamentGeneralSettingsServiceProvider::getTableName(), 'name', true)
                             ->maxLength(255),
 
                         Forms\Components\Select::make('type')

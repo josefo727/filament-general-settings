@@ -3,8 +3,8 @@
 namespace Josefo727\FilamentGeneralSettings\Filament\Resources\GeneralSettingResource\Pages;
 
 use Josefo727\FilamentGeneralSettings\Filament\Resources\GeneralSettingResource;
-use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Actions;
 
 class EditGeneralSetting extends EditRecord
 {
