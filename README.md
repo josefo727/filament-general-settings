@@ -21,21 +21,21 @@ A Filament plugin for managing general settings in a Laravel application.
 
 1. Install the package via Composer:
 
-```bash
-composer require josefo727/filament-general-settings
-```
+    ```bash
+    composer require josefo727/filament-general-settings
+    ```
 
 2. Run the installation command:
 
-```bash
-php artisan filament-general-settings:install
-```
+    ```bash
+    php artisan filament-general-settings:install
+    ```
 
 3. Run the migrations:
 
-```bash
-php artisan migrate
-```
+    ```bash
+    php artisan migrate
+    ```
 
 ## Configuration
 
@@ -73,6 +73,56 @@ return [
 ];
 ```
 
+## Integration with Filament Admin Panel
+
+### Register the Plugin
+
+To add the General Settings to your Filament Admin Panel, you need to register the plugin in your `App\Providers\Filament\AdminPanelProvider`:
+
+```php
+use Josefo727\FilamentGeneralSettings\FilamentGeneralSettingsPlugin;
+
+// ...
+
+public function panel(Panel $panel): Panel
+{
+    return $panel
+        // ...
+        ->plugins([
+            FilamentGeneralSettingsPlugin::make(),
+            // Other plugins...
+        ]);
+}
+```
+
+### Add Alias (Optional)
+
+#### Laravel 10 and 11
+
+For easier access to the GeneralSetting model without having to import it, you can add an alias in your `config/app.php` file:
+
+```php
+'aliases' => [
+    // ...
+    'GeneralSetting' => Josefo727\FilamentGeneralSettings\Models\GeneralSetting::class,
+],
+```
+
+#### Laravel 12
+
+For Laravel 12, you can register the alias in your `App\Providers\AppServiceProvider`:
+
+```php
+use Illuminate\Foundation\AliasLoader;
+use Josefo727\FilamentGeneralSettings\Models\GeneralSetting;
+
+public function register(): void
+{
+    $loader = AliasLoader::getInstance();
+    $loader->alias('GeneralSetting', GeneralSetting::class);
+}
+```
+
 ## Usage
 
 ### Accessing Settings
@@ -80,24 +130,27 @@ return [
 You can access settings in your application using the provided facade:
 
 ```php
-use Josefo727\FilamentGeneralSettings\Facades\FilamentGeneralSettings;
-
 // Get a setting value
-$value = FilamentGeneralSettings::get('setting_name');
+$value = GeneralSetting::getValue('setting_name');
 
 // Get a setting value with a default
-$value = FilamentGeneralSettings::get('setting_name', 'default_value');
+$value = GeneralSetting::getValue('setting_name', 'default_value');
 
 // Check if a setting exists
-if (FilamentGeneralSettings::has('setting_name')) {
+if (GeneralSetting::has('setting_name')) {
     // Do something
 }
 
 // Set a setting value
-FilamentGeneralSettings::set('setting_name', 'value', 'string', 'Description');
+GeneralSetting::create([
+    'name' => 'setting_name',
+    'value' => 'value',
+    'type' => 'string',
+    'description' => 'Description'
+]);
 
 // Remove a setting
-FilamentGeneralSettings::remove('setting_name');
+GeneralSetting::remove('setting_name');
 ```
 
 ### Data Types
@@ -129,7 +182,7 @@ php artisan vendor:publish --tag=filament-general-settings-translations
 ## Testing
 
 ```bash
-composer test
+./vendor/bin/phpunit
 ```
 
 ## License

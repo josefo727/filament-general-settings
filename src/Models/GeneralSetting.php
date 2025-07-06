@@ -53,11 +53,11 @@ class GeneralSetting extends Model
     /**
      * Get validation rules for a setting.
      *
-     * @param mixed $type
-     * @param mixed $id
+     * @param mixed|null $type
+     * @param mixed|null $id
      * @return array<string,mixed>
      */
-    public static function getValidationRules($type = null, $id = null): array
+    public static function getValidationRules(mixed $type = null, mixed $id = null): array
     {
         $dataType = new DataTypeService();
         $rules = $dataType->getValidationRule($type) ?: 'required';
@@ -72,10 +72,9 @@ class GeneralSetting extends Model
     }
 
     /**
-     * Create a new setting.
-     *
-     * @return GeneralSetting
-     * @param array<string,mixed> $attributes
+     * @param array $attributes
+     * @param int|null $id
+     * @return array
      */
     private static function prepareAttributesForSaving(array $attributes, ?int $id = null): array
     {
@@ -186,22 +185,43 @@ class GeneralSetting extends Model
     }
 
     /**
-     * Get a setting value by name.
-     *
      * @param string $name
-     * @return mixed
+     * @param string|null $default
+     * @return mixed|string|null
      */
-    public static function getValue(string $name)
+    public static function getValue(string $name, string $default = null): mixed
     {
         $setting = static::query()->firstWhere('name', '=', $name);
 
         if (is_null($setting)) {
-            return null;
+            return $default;
         }
 
         $dataType = new DataTypeService();
 
         return $dataType->castForUse($setting->value, $setting->type);
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public static function has(string $name): bool
+    {
+        $setting = static::query()->firstWhere('name', '=', $name);
+
+        return !!$setting;
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public static function remove(string $name): bool
+    {
+        $setting = static::query()->firstWhere('name', '=', $name);
+
+        return !!optional($setting)->delete();
     }
 
     /**
