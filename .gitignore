@@ -1,0 +1,32 @@
+# Composer dependencies
+/vendor/
+
+# Composer cache files
+composer.lock
+
+# PHPUnit files
+.phpunit.result.cache
+
+# Configuration files for your editor/IDE (PhpStorm, Visual Studio Code, etc.)
+.idea/
+
+# Log files or tmp
+*.log
+*.tmp
+
+# Results of environment-specific tests or configurations
+tests/output/
+tests/.env.testing
+
+# Configuration of the local environment
+.env
+.env.*
+
+# Other files that can be dynamically generated
+.DS_Store
+*.swp
+Thumbs.db
+
+# Configuration of operating systems or personal files
+*.bak
+*.cache
