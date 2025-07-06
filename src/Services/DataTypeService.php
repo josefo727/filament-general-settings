@@ -169,7 +169,7 @@ class DataTypeService
             ],
             'email' => [
                 'name' => __('filament-general-settings::types.email'),
-                'rules' => 'required|email',
+                'rules' => 'required|email|regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/',
                 'prepareForUse' => fn($value) => $value
             ],
             'emails' => [

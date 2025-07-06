@@ -2,6 +2,7 @@
 
 namespace Josefo727\FilamentGeneralSettings\Filament\Resources;
 
+use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -69,6 +70,11 @@ class GeneralSettingResource extends Resource
                         $set('value', '');
                     }),
 
+                Forms\Components\Textarea::make('description')
+                    ->label(__('filament-general-settings::general.fields.description'))
+                    ->maxLength(255)
+                    ->columnSpanFull(),
+
                 // Campo dinámico para el valor según el tipo seleccionado
                 Forms\Components\Group::make()
                     ->schema(function (Forms\Get $get) use ($dataTypeService) {
@@ -82,124 +88,136 @@ class GeneralSettingResource extends Resource
                             ];
                         }
 
-                        switch ($type) {
-                            case 'string':
-                                return [
-                                    Forms\Components\TextInput::make('value')
-                                        ->label(__('filament-general-settings::general.fields.value'))
-                                        ->required()
-                                ];
-                            case 'integer':
-                                return [
-                                    Forms\Components\TextInput::make('value')
-                                        ->label(__('filament-general-settings::general.fields.value'))
-                                        ->numeric()
-                                        ->integer()
-                                        ->required()
-                                ];
-                            case 'float':
-                                return [
-                                    Forms\Components\TextInput::make('value')
-                                        ->label(__('filament-general-settings::general.fields.value'))
-                                        ->numeric()
-                                        ->required()
-                                ];
-                            case 'boolean':
-                                return [
-                                    Forms\Components\Toggle::make('value')
-                                        ->label(__('filament-general-settings::general.fields.value'))
-                                        ->required()
-                                        ->formatStateUsing(function ($state) {
-                                            if ($state === null) {
-                                                return false;
-                                            }
-                                            if (is_string($state)) {
-                                                return in_array(strtolower($state), ['1', 'true', 'on', 'yes']);
-                                            }
-                                            return (bool) $state;
-                                        })
-                                ];
-                            case 'array':
-                                return [
-                                    Forms\Components\TagsInput::make('value')
-                                        ->label(__('filament-general-settings::general.fields.value'))
-                                        ->required()
-                                        ->separator(',')
-                                ];
-                            case 'json':
-                                return [
-                                    Forms\Components\Textarea::make('value')
-                                        ->label(__('filament-general-settings::general.fields.value'))
-                                        ->required()
-                                        ->helperText(new HtmlString('<span class="text-xs text-gray-500">JSON válido (ej: {"clave": "valor"})</span>'))
-                                        ->rule('json')
-                                ];
-                            case 'date':
-                                return [
-                                    Forms\Components\DatePicker::make('value')
-                                        ->label(__('filament-general-settings::general.fields.value'))
-                                        ->required()
-                                ];
-                            case 'time':
-                                return [
-                                    Forms\Components\TimePicker::make('value')
-                                        ->label(__('filament-general-settings::general.fields.value'))
-                                        ->required()
-                                        ->seconds()
-                                ];
-                            case 'datetime':
-                                return [
-                                    Forms\Components\DateTimePicker::make('value')
-                                        ->label(__('filament-general-settings::general.fields.value'))
-                                        ->required()
-                                        ->seconds()
-                                ];
-                            case 'url':
-                                return [
-                                    Forms\Components\TextInput::make('value')
-                                        ->label(__('filament-general-settings::general.fields.value'))
-                                        ->required()
-                                        ->url()
-                                ];
-                            case 'email':
-                                return [
-                                    Forms\Components\TextInput::make('value')
-                                        ->label(__('filament-general-settings::general.fields.value'))
-                                        ->required()
-                                        ->email()
-                                ];
-                            case 'emails':
-                                return [
-                                    Forms\Components\TagsInput::make('value')
-                                        ->label(__('filament-general-settings::general.fields.value'))
-                                        ->placeholder(__('filament-general-settings::types.emails'))
-                                        ->required()
-                                        ->separator(',')
-                                        ->helperText(__('filament-general-settings::types.emails'))
-                                ];
-                            case 'password':
-                                return [
-                                    Forms\Components\TextInput::make('value')
-                                        ->label(__('filament-general-settings::general.fields.value'))
-                                        ->required()
-                                        ->password()
-                                        ->minLength(4)
-                                        ->helperText(config('filament-general-settings.encryption.enabled')
-                                            ? __('filament-general-settings::types.password')
-                                            : __('filament-general-settings::types.password_not_encrypted'))
-                                ];
-                            default:
-                                return [
-                                    Forms\Components\Textarea::make('value')
-                                        ->label(__('filament-general-settings::general.fields.value'))
-                                        ->required()
-                                ];
-                        }
-                    }),
+                        // Get validation rules from DataTypeService
+                        $validationRules = $dataTypeService->getValidationRule($type);
 
-                Forms\Components\Textarea::make('description')
-                    ->label(__('filament-general-settings::general.fields.description'))
-                    ->maxLength(255),
+                        // Parse the validation rules to extract individual rules
+                        $rulesArray = $validationRules ?? 'required';
+
+                        return match ($type) {
+                            'string' => [
+                                Forms\Components\Textarea::make('value')
+                                    ->label(__('filament-general-settings::general.fields.value'))
+                                    ->rules($rulesArray)
+                                    ->helperText('Any plain text')
+                            ],
+                            'integer' => [
+                                Forms\Components\TextInput::make('value')
+                                    ->label(__('filament-general-settings::general.fields.value'))
+                                    ->numeric()
+                                    ->integer()
+                                    ->rules($rulesArray)
+                                    ->helperText('35')
+                            ],
+                            'float' => [
+                                Forms\Components\TextInput::make('value')
+                                    ->label(__('filament-general-settings::general.fields.value'))
+                                    ->numeric()
+                                    ->rules($rulesArray)
+                                    ->helperText('35.25')
+                            ],
+                            'boolean' => [
+                                Forms\Components\Toggle::make('value')
+                                    ->label(__('filament-general-settings::general.fields.value'))
+                                    ->rules($rulesArray)
+                                    ->formatStateUsing(function ($state) {
+                                        if ($state === null) {
+                                            return false;
+                                        }
+                                        if (is_string($state)) {
+                                            return in_array(strtolower($state), ['1', 'true', 'on', 'yes']);
+                                        }
+                                        return (bool)$state;
+                                    })
+                            ],
+                            'array' => [
+                                Forms\Components\Textarea::make('value')
+                                    ->label(__('filament-general-settings::general.fields.value'))
+                                    ->rules($rulesArray)
+                                    ->afterStateUpdated(function (Forms\Set $set, $state) {
+                                        if (!$state) return;
+                                        $set('value', preg_replace('/\s*,\s*/', ',', trim($state)));
+                                    })
+                                    ->helperText(new HtmlString('<span class="text-xs text-gray-500">value 01, value 02</span>'))
+                            ],
+                            'json' => [
+                                Forms\Components\Textarea::make('value')
+                                    ->label(__('filament-general-settings::general.fields.value'))
+                                    ->rules($rulesArray)
+                                    ->helperText(new HtmlString('<span class="text-xs text-gray-500">{"clave": "valor"}</span>'))
+                            ],
+                            'date' => [
+                                Forms\Components\DatePicker::make('value')
+                                    ->label(__('filament-general-settings::general.fields.value'))
+                                    ->rules($rulesArray)
+                                    ->helperText('06/07/2025')
+                            ],
+                            'time' => [
+                                Forms\Components\TimePicker::make('value')
+                                    ->label(__('filament-general-settings::general.fields.value'))
+                                    ->rules($rulesArray)
+                                    ->seconds()
+                                    ->helperText('10:25:00 am')
+                            ],
+                            'datetime' => [
+                                Forms\Components\DateTimePicker::make('value')
+                                    ->label(__('filament-general-settings::general.fields.value'))
+                                    ->rules($rulesArray)
+                                    ->seconds()
+                                    ->helperText('06/07/2025 10:25:00 am')
+                                    ->afterStateUpdated(function (Forms\Set $set, $state) {
+                                        if (!$state) return;
+                                        $set('value', Carbon::parse($state)->format('Y-m-d H:i:s'));
+                                    })
+                                    ->dehydrateStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('Y-m-d H:i:s') : null)
+                            ],
+                            'url' => [
+                                Forms\Components\TextInput::make('value')
+                                    ->label(__('filament-general-settings::general.fields.value'))
+                                    ->rules($rulesArray)
+                                    ->url()
+                                    ->helperText('https://example.com/path/to/resource?query=string#hash')
+                            ],
+                            'email' => [
+                                Forms\Components\TextInput::make('value')
+                                    ->label(__('filament-general-settings::general.fields.value'))
+                                    ->rules($rulesArray)
+                                    ->email()
+                                    ->helperText('name@mail.com')
+                            ],
+                            'emails' => [
+                                Forms\Components\Textarea::make('value')
+                                    ->label(__('filament-general-settings::general.fields.value'))
+                                    ->placeholder(__('filament-general-settings::types.emails'))
+                                    ->rules($rulesArray)
+                                    ->afterStateUpdated(function (Forms\Set $set, $state) {
+                                        if (!$state) return;
+                                        $set('value', preg_replace('/\s*,\s*/', ',', trim($state)));
+                                    })
+                                    ->dehydrateStateUsing(fn ($state) => $state ? preg_replace('/\s*,\s*/', ',', $state) : null)
+                                    ->helperText('name_1@mail.com,name_2@mail.com,name_3@mail.com')
+                            ],
+                            'password' => [
+                                Forms\Components\TextInput::make('value')
+                                    ->label(__('filament-general-settings::general.fields.value'))
+                                    ->rules($rulesArray)
+                                    ->password()
+                                    ->afterStateHydrated(function ($set, $get, $state, $record) {
+                                        if ($record && $get('type') === 'password') {
+                                            $set('value', null);
+                                        }
+                                    })
+                                    ->revealable()
+                                    ->helperText('Z&5G5WvTvrIviJ')
+                            ],
+                            default => [
+                                Forms\Components\Textarea::make('value')
+                                    ->label(__('filament-general-settings::general.fields.value'))
+                                    ->rules($rulesArray)
+                            ],
+                        };
+                    })
+                    ->columnSpanFull(),
             ]);
     }
 
