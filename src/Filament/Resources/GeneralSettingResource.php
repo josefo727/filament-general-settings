@@ -4,12 +4,9 @@ namespace Josefo727\FilamentGeneralSettings\Filament\Resources;
 
 use Filament\Forms;
 use Filament\Forms\Form;
-use Filament\Forms\Get;
-use Filament\Forms\Set;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 use Josefo727\FilamentGeneralSettings\Filament\Resources\GeneralSettingResource\Pages;
 use Josefo727\FilamentGeneralSettings\Models\GeneralSetting;
 use Josefo727\FilamentGeneralSettings\Services\DataTypeService;
@@ -20,6 +17,16 @@ class GeneralSettingResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-cog';
 
+    public static function getModelLabel(): string
+    {
+        return __('filament-general-settings::general.label_singular');
+    }
+
+    public static function getPluralModelLabel(): string
+    {
+        return __('filament-general-settings::general.label_plural');
+    }
+
     public static function getNavigationLabel(): string
     {
         return __('filament-general-settings::general.navigation_label');
@@ -27,17 +34,17 @@ class GeneralSettingResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('filament-general-settings::general.navigation_group');
+        return config('filament-general-settings.navigation.group', 'Settings');
     }
 
-    public static function getModelLabel(): string
+    public static function getNavigationIcon(): string
     {
-        return __('filament-general-settings::general.title');
+        return config('filament-general-settings.navigation.icon', 'heroicon-o-cog');
     }
 
-    public static function getPluralModelLabel(): string
+    public static function getNavigationSort(): ?int
     {
-        return __('filament-general-settings::general.title');
+        return config('filament-general-settings.navigation.sort', 1);
     }
 
     public static function form(Form $form): Form
@@ -46,64 +53,22 @@ class GeneralSettingResource extends Resource
 
         return $form
             ->schema([
-                Forms\Components\Section::make()
-                    ->schema([
-                        Forms\Components\TextInput::make('name')
-                            ->label(__('filament-general-settings::general.fields.name'))
-                            ->required()
-                            ->unique(
-                                table: fn () => \Josefo727\FilamentGeneralSettings\FilamentGeneralSettingsServiceProvider::getTableName(),
-                                column: 'name',
-                                ignorable: fn ($record) => $record
-                            )
-                            ->maxLength(255),
-                        Forms\Components\Select::make('type')
-                            ->label(__('filament-general-settings::general.fields.type'))
-                            ->required()
-                            ->reactive()
-                            ->options($dataTypeService->getTypes())
-                            ->afterStateUpdated(function (Set $set) {
-                                $set('value', '');
-                            }),
-                        Forms\Components\Textarea::make('description')
-                            ->label(__('filament-general-settings::general.fields.description'))
-                            ->columnSpan('full')
-                            ->rows(3)
-                            ->maxLength(255),
-                        Forms\Components\Textarea::make('value')
-                            ->label(__('filament-general-settings::general.fields.value'))
-                            ->required()
-                            ->columnSpan('full')
-                            ->rows(3)
-                            // Gestionar la visualización de valores de array y otros tipos especiales
-                            ->formatStateUsing(function ($state, $record) use ($dataTypeService) {
-                                if (!$record) return $state;
-
-                                if (in_array($record->type, ['array', 'emails']) && is_string($state)) {
-                                    return $state; // Ya está en formato string, listo para editar
-                                }
-
-                                if ($record->type === 'password') {
-                                    // Si estamos en edición, no mostramos la contraseña
-                                    return '';
-                                }
-
-                                if ($record->type === 'json' && is_string($state)) {
-                                    // Formatear JSON para mejor visualización
-                                    $decoded = json_decode($state, true);
-                                    if ($decoded && json_last_error() === JSON_ERROR_NONE) {
-                                        return json_encode($decoded, JSON_PRETTY_PRINT);
-                                    }
-                                }
-
-                                return $state;
-                            })
-                            // Transformar datos antes de guardar
-                            ->dehydrateStateUsing(function ($state, Get $get) use ($dataTypeService) {
-                                $type = $get('type');
-                                return $dataTypeService->castForStorage($state, $type);
-                            }),
-                    ]),
+                Forms\Components\TextInput::make('name')
+                    ->label(__('filament-general-settings::general.fields.name'))
+                    ->required()
+                    ->unique(ignoreRecord: true)
+                    ->maxLength(255),
+                Forms\Components\Select::make('type')
+                    ->label(__('filament-general-settings::general.fields.type'))
+                    ->options($dataTypeService->getTypesForSelect())
+                    ->required()
+                    ->reactive(),
+                Forms\Components\Textarea::make('value')
+                    ->label(__('filament-general-settings::general.fields.value'))
+                    ->required(),
+                Forms\Components\Textarea::make('description')
+                    ->label(__('filament-general-settings::general.fields.description'))
+                    ->maxLength(255),
             ]);
     }
 
@@ -118,10 +83,17 @@ class GeneralSettingResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('type')
                     ->label(__('filament-general-settings::general.fields.type'))
-                    ->formatStateUsing(fn ($state) => $dataTypeService->getTypes()[$state] ?? $state)
+                    ->formatStateUsing(fn ($state) => $dataTypeService->getTypes()[$state]['name'] ?? $state)
                     ->searchable(),
                 Tables\Columns\TextColumn::make('valueForDisplay')
                     ->label(__('filament-general-settings::general.fields.value'))
+                    ->formatStateUsing(function ($state) {
+                        // Asegurarse de que el valor sea una cadena
+                        if (is_array($state)) {
+                            return json_encode($state);
+                        }
+                        return (string) $state;
+                    })
                     ->searchable()
                     ->limit(50),
                 Tables\Columns\TextColumn::make('description')

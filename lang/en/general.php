@@ -3,6 +3,8 @@
 return [
     'title' => 'General Settings',
     'navigation_label' => 'General Settings',
+    'label_plural' => 'General Settings',
+    'label_singular' => 'General Setting',
     'navigation_group' => 'Settings',
     'create_button' => 'Create Setting',
     'edit_button' => 'Edit Setting',

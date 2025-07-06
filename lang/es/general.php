@@ -3,6 +3,8 @@
 return [
     'title' => 'Configuraciones Generales',
     'navigation_label' => 'Configuraciones Generales',
+    'label_plural' => 'Configuraciones Generales',
+    'label_singular' => 'Configuración General',
     'navigation_group' => 'Configuraciones',
     'create_button' => 'Crear Configuración',
     'edit_button' => 'Editar Configuración',
