@@ -2,43 +2,39 @@
 
 namespace Josefo727\FilamentGeneralSettings\Tests;
 
-use Filament\Actions\ActionsServiceProvider;
 use Filament\FilamentServiceProvider;
-use Filament\Forms\FormsServiceProvider;
-use Filament\Infolists\InfolistsServiceProvider;
-use Filament\Notifications\NotificationsServiceProvider;
-use Filament\Support\SupportServiceProvider;
-use Filament\Tables\TablesServiceProvider;
-use Filament\Widgets\WidgetsServiceProvider;
-use Illuminate\Database\Eloquent\Factories\Factory as EloquentFactory;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Josefo727\FilamentGeneralSettings\FilamentGeneralSettingsServiceProvider;
-use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as Orchestra;
+use Livewire\LivewireServiceProvider;
+use Filament\Support\SupportServiceProvider;
+use Filament\Forms\FormsServiceProvider;
+use Filament\Tables\TablesServiceProvider;
+use Filament\Notifications\NotificationsServiceProvider;
+use Filament\Actions\ActionsServiceProvider;
+use Filament\Infolists\InfolistsServiceProvider;
+use Filament\Widgets\WidgetsServiceProvider;
+use Illuminate\Support\Facades\Schema;
 
 class TestCase extends Orchestra
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();
 
-        // Load and run migrations from the test directory first
-        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
-        $this->artisan('migrate');
-
-        // Create a user directly instead of using the factory
-        $user = new User();
-        $user->name = 'Test User';
-        $user->email = 'test@example.com';
-        $user->password = bcrypt('password');
-        $user->save();
-
-        $this->actingAs($user);
+        Factory::guessFactoryNamesUsing(
+            fn (string $modelName) => 'Josefo727\\FilamentGeneralSettings\\Tests\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
+        );
     }
 
-    protected function getPackageProviders($app): array
+    protected function getPackageProviders($app)
     {
         return [
-            FilamentServiceProvider::class,
+            // Paquetes base de Laravel y Filament
+            LivewireServiceProvider::class,
             SupportServiceProvider::class,
             FormsServiceProvider::class,
             TablesServiceProvider::class,
@@ -46,35 +42,60 @@ class TestCase extends Orchestra
             ActionsServiceProvider::class,
             InfolistsServiceProvider::class,
             WidgetsServiceProvider::class,
+            FilamentServiceProvider::class,
+
+            // Nuestro proveedor de servicios
             FilamentGeneralSettingsServiceProvider::class,
-            LivewireServiceProvider::class,
         ];
     }
 
-    public function getEnvironmentSetUp($app): void
+    public function getEnvironmentSetUp($app)
     {
+        // Configurar clave de aplicación para pruebas
+        $app['config']->set('app.key', 'base64:'.base64_encode(
+                'KaPdSgVkxX2bPTygJO38wgVagNJiGU3U'
+            ));
+
         config()->set('database.default', 'testing');
         config()->set('database.connections.testing', [
-            'driver'   => 'sqlite',
+            'driver' => 'sqlite',
             'database' => ':memory:',
-            'prefix'   => '',
+            'prefix' => '',
         ]);
 
-        // Set the table prefix for testing if needed
-        $app['config']->set('filament-general-settings.table.prefix', '');
+        // Configurar el prefijo de tabla para asegurar que las pruebas usen el mismo nombre de tabla
+        config()->set('filament-general-settings.table.prefix', '');
+        config()->set('filament-general-settings.table.name', 'general_settings');
 
-        // Configure Filament panel
-        $app['config']->set('filament.default_filesystem_disk', 'public');
-        $app['config']->set('filament.auth.guard', 'web');
-        $app['config']->set('filament.auth.provider', 'users');
-        $app['config']->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
+        // Configurar la encriptación para pruebas (desactivarla)
+        config()->set('filament-general-settings.encryption.enabled', false);
 
-        // Register a default panel
-        $app['config']->set('filament.panels.admin', [
-            'id' => 'admin',
-            'path' => 'admin',
-            'middleware' => ['web'],
-            'default_route' => 'dashboard',
-        ]);
+        // Crear la tabla general_settings manualmente para las pruebas que no necesitan todas las migraciones
+        $this->createGeneralSettingsTable();
+    }
+
+    /**
+     * Crear la tabla general_settings para pruebas
+     */
+    protected function createGeneralSettingsTable()
+    {
+        if (!Schema::hasTable('general_settings')) {
+            Schema::create('general_settings', function ($table) {
+                $table->id();
+                $table->string('name')->unique();
+                $table->text('value')->nullable();
+                $table->string('type')->default('string');
+                $table->string('description')->nullable();
+                $table->timestamps();
+            });
+        }
+    }
+
+    /**
+     * Define database migrations.
+     */
+    protected function defineDatabaseMigrations()
+    {
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
     }
 }

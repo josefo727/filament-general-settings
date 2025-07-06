@@ -2,13 +2,15 @@
 
 namespace Josefo727\FilamentGeneralSettings;
 
+use Josefo727\FilamentGeneralSettings\Models\GeneralSetting;
+
 class FilamentGeneralSettings
 {
     protected string $modelClass;
 
     public function __construct()
     {
-        $this->modelClass = config('filament-general-settings.model', \Josefo727\FilamentGeneralSettings\Models\GeneralSetting::class);
+        $this->modelClass = config('filament-general-settings.model', GeneralSetting::class);
     }
     /**
      * Get a setting value by name.
@@ -29,7 +31,7 @@ class FilamentGeneralSettings
      * @param mixed $value
      * @param string|null $type
      * @param string|null $description
-     * @return \Josefo727\FilamentGeneralSettings\Models\GeneralSetting
+     * @return GeneralSetting
      */
     public function set(string $name, $value, ?string $type = 'string', ?string $description = null)
     {

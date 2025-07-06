@@ -80,10 +80,14 @@ class GeneralSetting extends Model
     private static function prepareAttributesForSaving(array $attributes, ?int $id = null): array
     {
         if (isset($attributes['type']) && in_array($attributes['type'], ['emails', 'array']) && isset($attributes['value'])) {
-            $value = preg_replace('/\s+/', ' ', $attributes['value']);
-            $attributes['value'] = preg_replace('/\s*,\s*/', ',', $value);
+            if (is_string($attributes['value'])) {
+                $value = preg_replace('/\s+/', ' ', $attributes['value']);
+                $attributes['value'] = preg_replace('/\s*,\s*/', ',', $value);
+            } elseif (is_array($attributes['value'])) {
+                $attributes['value'] = implode(',', $attributes['value']);
+            }
         }
-        
+
         // Validate data
         Validator::make(
             $attributes,
@@ -149,20 +153,36 @@ class GeneralSetting extends Model
      */
     public function getValueForDisplayAttribute(): string
     {
-        if ($this->type !== 'password') {
-            return $this->value;
-        }
-
-        if (!Config::get('filament-general-settings.show_passwords')) {
+        if (is_null($this->value)) {
             return '';
         }
 
-        if (Config::get('filament-general-settings.encryption.enabled')) {
-            $dataType = new DataTypeService();
-            return $dataType->castForUse($this->value, 'password');
+        if ($this->type === 'password') {
+            if (!Config::get('filament-general-settings.show_passwords')) {
+                return '********';
+            }
+
+            if (Config::get('filament-general-settings.encryption.enabled')) {
+                $dataType = new DataTypeService();
+                return $dataType->castForUse($this->value, 'password');
+            }
         }
 
-        return $this->value;
+        if (in_array($this->type, ['array', 'emails'])) {
+            if (is_array($this->value)) {
+                return implode(', ', $this->value);
+            }
+            return $this->value;
+        }
+
+        if ($this->type === 'json') {
+            $decoded = json_decode($this->value, true);
+            if ($decoded && json_last_error() === JSON_ERROR_NONE) {
+                return json_encode($decoded, JSON_PRETTY_PRINT);
+            }
+        }
+
+        return (string) $this->value;
     }
 
     /**
@@ -194,8 +214,8 @@ class GeneralSetting extends Model
     public function scopeApplyFilters(Builder $query, Request $request): Builder
     {
         return $query->when(!!$request->name, function ($query) use ($request) {
-                $query->where('name', 'LIKE', "%$request->name%");
-            })
+            $query->where('name', 'LIKE', "%$request->name%");
+        })
             ->when(!!$request->type, function ($query) use ($request) {
                 $query->where('type', $request->type);
             })

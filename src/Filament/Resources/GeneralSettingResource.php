@@ -2,9 +2,15 @@
 
 namespace Josefo727\FilamentGeneralSettings\Filament\Resources;
 
+use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Resources\Resource;
+use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Josefo727\FilamentGeneralSettings\Filament\Resources\GeneralSettingResource\Pages;
 use Josefo727\FilamentGeneralSettings\Models\GeneralSetting;
 use Josefo727\FilamentGeneralSettings\Services\DataTypeService;
 
@@ -19,14 +25,9 @@ class GeneralSettingResource extends Resource
         return __('filament-general-settings::general.navigation_label');
     }
 
-    public static function getNavigationGroup(): string
+    public static function getNavigationGroup(): ?string
     {
-        return config('filament-general-settings.navigation.group', __('filament-general-settings::general.navigation_group'));
-    }
-
-    public static function getNavigationSort(): int
-    {
-        return config('filament-general-settings.navigation.sort', 1);
+        return __('filament-general-settings::general.navigation_group');
     }
 
     public static function getModelLabel(): string
@@ -34,10 +35,14 @@ class GeneralSettingResource extends Resource
         return __('filament-general-settings::general.title');
     }
 
+    public static function getPluralModelLabel(): string
+    {
+        return __('filament-general-settings::general.title');
+    }
+
     public static function form(Form $form): Form
     {
         $dataTypeService = new DataTypeService();
-        $types = $dataTypeService->getTypesForSelect();
 
         return $form
             ->schema([
@@ -45,173 +50,90 @@ class GeneralSettingResource extends Resource
                     ->schema([
                         Forms\Components\TextInput::make('name')
                             ->label(__('filament-general-settings::general.fields.name'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.name'))
                             ->required()
-                            ->unique(\Josefo727\FilamentGeneralSettings\FilamentGeneralSettingsServiceProvider::getTableName(), 'name', true)
+                            ->unique(
+                                table: fn () => \Josefo727\FilamentGeneralSettings\FilamentGeneralSettingsServiceProvider::getTableName(),
+                                column: 'name',
+                                ignorable: fn ($record) => $record
+                            )
                             ->maxLength(255),
-
                         Forms\Components\Select::make('type')
                             ->label(__('filament-general-settings::general.fields.type'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.type'))
-                            ->options($types)
                             ->required()
                             ->reactive()
-                            ->afterStateUpdated(fn ($state, callable $set) => $set('value', '')),
-
-                        Forms\Components\TextInput::make('value')
-                            ->label(__('filament-general-settings::general.fields.value'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.value'))
-                            ->required()
-                            ->visible(fn (callable $get) => $get('type') === 'string')
-                            ->maxLength(255),
-
-                        Forms\Components\TextInput::make('value')
-                            ->label(__('filament-general-settings::general.fields.value'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.value'))
-                            ->required()
-                            ->numeric()
-                            ->integer()
-                            ->visible(fn (callable $get) => $get('type') === 'integer'),
-
-                        Forms\Components\TextInput::make('value')
-                            ->label(__('filament-general-settings::general.fields.value'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.value'))
-                            ->required()
-                            ->numeric()
-                            ->visible(fn (callable $get) => $get('type') === 'float'),
-
-                        Forms\Components\Toggle::make('value')
-                            ->label(__('filament-general-settings::general.fields.value'))
-                            ->visible(fn (callable $get) => $get('type') === 'boolean')
-                            ->onColor('success')
-                            ->offColor('danger')
-                            ->required(),
-
-                        Forms\Components\TagsInput::make('value')
-                            ->label(__('filament-general-settings::general.fields.value'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.value'))
-                            ->required()
-                            ->visible(fn (callable $get) => $get('type') === 'array')
-                            ->separator(',')
-                            ->rules(['array', 'min:1'])
-                            ->validationMessages([
-                                'min' => __('filament-general-settings::validation.array_min'),
-                            ]),
-
-                        Forms\Components\Textarea::make('value')
-                            ->label(__('filament-general-settings::general.fields.value'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.value'))
-                            ->required()
-                            ->visible(fn (callable $get) => $get('type') === 'json')
-                            ->rows(5)
-                            ->rule('json', fn () => __('filament-general-settings::validation.json')),
-
-                        Forms\Components\DatePicker::make('value')
-                            ->label(__('filament-general-settings::general.fields.value'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.value'))
-                            ->required()
-                            ->visible(fn (callable $get) => $get('type') === 'date'),
-
-                        Forms\Components\TimePicker::make('value')
-                            ->label(__('filament-general-settings::general.fields.value'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.value'))
-                            ->required()
-                            ->visible(fn (callable $get) => $get('type') === 'time')
-                            ->seconds()
-                            ->format('H:i:s'),
-
-                        Forms\Components\DateTimePicker::make('value')
-                            ->label(__('filament-general-settings::general.fields.value'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.value'))
-                            ->required()
-                            ->visible(fn (callable $get) => $get('type') === 'datetime')
-                            ->seconds()
-                            ->format('Y-m-d H:i:s'),
-
-                        Forms\Components\TextInput::make('value')
-                            ->label(__('filament-general-settings::general.fields.value'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.value'))
-                            ->required()
-                            ->url()
-                            ->visible(fn (callable $get) => $get('type') === 'url')
-                            ->maxLength(255),
-
-                        Forms\Components\TextInput::make('value')
-                            ->label(__('filament-general-settings::general.fields.value'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.value'))
-                            ->required()
-                            ->email()
-                            ->visible(fn (callable $get) => $get('type') === 'email')
-                            ->maxLength(255),
-
-                        Forms\Components\TagsInput::make('value')
-                            ->label(__('filament-general-settings::general.fields.value'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.value'))
-                            ->required()
-                            ->visible(fn (callable $get) => $get('type') === 'emails')
-                            ->separator(',')
-                            ->rules(['array', function ($attribute, $value, $fail) {
-                                foreach ($value as $email) {
-                                    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                                        $fail(__('filament-general-settings::validation.email', ['email' => $email]));
-                                        break;
-                                    }
-                                }
-                            }]),
-
-                        Forms\Components\TextInput::make('value')
-                            ->label(__('filament-general-settings::general.fields.value'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.value'))
-                            ->required()
-                            ->password()
-                            ->visible(fn (callable $get) => $get('type') === 'password')
-                            ->maxLength(255)
-                            ->minLength(4)
-                            ->validationMessages([
-                                'min' => __('filament-general-settings::validation.password_min', ['min' => 4]),
-                            ]),
-
+                            ->options($dataTypeService->getTypes())
+                            ->afterStateUpdated(function (Set $set) {
+                                $set('value', '');
+                            }),
                         Forms\Components\Textarea::make('description')
                             ->label(__('filament-general-settings::general.fields.description'))
-                            ->placeholder(__('filament-general-settings::general.placeholders.description'))
+                            ->columnSpan('full')
                             ->rows(3)
                             ->maxLength(255),
+                        Forms\Components\Textarea::make('value')
+                            ->label(__('filament-general-settings::general.fields.value'))
+                            ->required()
+                            ->columnSpan('full')
+                            ->rows(3)
+                            // Gestionar la visualización de valores de array y otros tipos especiales
+                            ->formatStateUsing(function ($state, $record) use ($dataTypeService) {
+                                if (!$record) return $state;
+
+                                if (in_array($record->type, ['array', 'emails']) && is_string($state)) {
+                                    return $state; // Ya está en formato string, listo para editar
+                                }
+
+                                if ($record->type === 'password') {
+                                    // Si estamos en edición, no mostramos la contraseña
+                                    return '';
+                                }
+
+                                if ($record->type === 'json' && is_string($state)) {
+                                    // Formatear JSON para mejor visualización
+                                    $decoded = json_decode($state, true);
+                                    if ($decoded && json_last_error() === JSON_ERROR_NONE) {
+                                        return json_encode($decoded, JSON_PRETTY_PRINT);
+                                    }
+                                }
+
+                                return $state;
+                            })
+                            // Transformar datos antes de guardar
+                            ->dehydrateStateUsing(function ($state, Get $get) use ($dataTypeService) {
+                                $type = $get('type');
+                                return $dataTypeService->castForStorage($state, $type);
+                            }),
                     ]),
             ]);
     }
 
     public static function table(Table $table): Table
     {
+        $dataTypeService = new DataTypeService();
+
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('filament-general-settings::general.fields.name'))
-                    ->searchable()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('valueForDisplay')
-                    ->label(__('filament-general-settings::general.fields.value'))
-                    ->searchable(function (Builder $query, string $search): Builder {
-                        return $query->where('value', 'like', "%{$search}%");
-                    }),
+                    ->searchable(),
                 Tables\Columns\TextColumn::make('type')
                     ->label(__('filament-general-settings::general.fields.type'))
+                    ->formatStateUsing(fn ($state) => $dataTypeService->getTypes()[$state] ?? $state)
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('valueForDisplay')
+                    ->label(__('filament-general-settings::general.fields.value'))
                     ->searchable()
-                    ->sortable(),
+                    ->limit(50),
                 Tables\Columns\TextColumn::make('description')
                     ->label(__('filament-general-settings::general.fields.description'))
                     ->searchable()
-                    ->limit(50),
-                Tables\Columns\TextColumn::make('updated_at')
-                    ->label(__('filament-general-settings::general.fields.updated_at'))
-                    ->dateTime()
-                    ->sortable(),
+                    ->limit(20),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([

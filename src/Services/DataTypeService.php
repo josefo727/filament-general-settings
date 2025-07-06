@@ -14,13 +14,6 @@ class DataTypeService
         $this->setTypes();
     }
 
-    /**
-     * Cast a value for use according to its type.
-     *
-     * @param mixed $value
-     * @param string $type
-     * @return mixed
-     */
     public function castForUse($value, $type)
     {
         return in_array($type, array_keys($this->types))
@@ -28,12 +21,6 @@ class DataTypeService
             : $value;
     }
 
-    /**
-     * Get validation rule for a type.
-     *
-     * @param string $type
-     * @return string
-     */
     public function getValidationRule($type)
     {
         return in_array($type, array_keys($this->types))
@@ -41,11 +28,6 @@ class DataTypeService
             : '';
     }
 
-    /**
-     * Get types for select.
-     *
-     * @return array
-     */
     public function getTypesForSelect(): array
     {
         return collect($this->types)->mapWithKeys(function($type, $key) {
@@ -55,42 +37,21 @@ class DataTypeService
         })->toArray();
     }
 
-    /**
-     * Get type info.
-     *
-     * @param string $type
-     * @return array
-     */
     public function getTypeInfo($type)
     {
         return $this->types[$type];
     }
 
-    /**
-     * Get list of types as comma-separated string.
-     *
-     * @return string
-     */
     public function getListTypes()
     {
         return implode(',', array_keys($this->types));
     }
 
-    /**
-     * Get all types.
-     *
-     * @return array
-     */
     public function getTypes()
     {
         return $this->types;
     }
 
-    /**
-     * Set types.
-     *
-     * @return void
-     */
     public function setTypes()
     {
         $this->types = [
@@ -113,17 +74,43 @@ class DataTypeService
                 'name' => __('filament-general-settings::types.boolean'),
                 'rules' => 'required|string|in:1,true,on,yes,0,false,off,no',
                 'prepareForUse' => function($value) {
-                    $falseValues = ['0', 'false', 'off', 'no'];
-                    return !in_array(strtolower((string) $value), $falseValues);
+                    if (is_bool($value)) {
+                        return $value;
+                    }
+
+                    if (is_string($value)) {
+                        $value = strtolower($value);
+
+                        // Valores que deben convertirse a true
+                        if (in_array($value, ['1', 'true', 'on', 'yes'])) {
+                            return true;
+                        }
+
+                        // Valores que deben convertirse a false
+                        if (in_array($value, ['0', 'false', 'off', 'no'])) {
+                            return false;
+                        }
+                    }
+
+                    // Conversión estándar de PHP para otros casos
+                    return (bool) $value;
                 }
             ],
             'array' => [
                 'name' => __('filament-general-settings::types.array'),
                 'rules' => 'required|string|regex:/^[^,]+(,[^,]+)*$/',
                 'prepareForUse' => function($value) {
-                        $value = preg_replace('/\s*,\s*/', ',', $value);
-                        return explode(',', $value);
+                    if (is_array($value)) {
+                        return $value;
                     }
+
+                    if (empty($value)) {
+                        return [];
+                    }
+
+                    $value = preg_replace('/\s*,\s*/', ',', $value);
+                    return array_map('trim', explode(',', $value));
+                }
             ],
             'json' => [
                 'name' => __('filament-general-settings::types.json'),
@@ -133,17 +120,47 @@ class DataTypeService
             'date' => [
                 'name' => __('filament-general-settings::types.date'),
                 'rules' => 'required|date',
-                'prepareForUse' => fn($value) => Carbon::parse($value)
+                'prepareForUse' => function($value) {
+                    if (empty($value)) {
+                        return $value;
+                    }
+
+                    try {
+                        return Carbon::parse($value);
+                    } catch (\Exception $e) {
+                        return $value;
+                    }
+                }
             ],
             'time' => [
                 'name' => __('filament-general-settings::types.time'),
                 'rules' => 'required|date_format:H:i:s',
-                'prepareForUse' => fn($value) => Carbon::parse($value)
+                'prepareForUse' => function($value) {
+                    if (empty($value)) {
+                        return $value;
+                    }
+
+                    try {
+                        return Carbon::parse($value);
+                    } catch (\Exception $e) {
+                        return $value;
+                    }
+                }
             ],
             'datetime' => [
                 'name' => __('filament-general-settings::types.datetime'),
                 'rules' => 'required|date_format:Y-m-d H:i:s',
-                'prepareForUse' => fn($value) => Carbon::parse($value)
+                'prepareForUse' => function($value) {
+                    if (empty($value)) {
+                        return $value;
+                    }
+
+                    try {
+                        return Carbon::parse($value);
+                    } catch (\Exception $e) {
+                        return $value;
+                    }
+                }
             ],
             'url' => [
                 'name' => __('filament-general-settings::types.url'),
@@ -159,21 +176,53 @@ class DataTypeService
                 'name' => __('filament-general-settings::types.emails'),
                 'rules' => 'required|string|regex:/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(,[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})*$/',
                 'prepareForUse' => function($value) {
-                        $value = preg_replace('/\s*,\s*/', ',', $value);
-                        return explode(',', $value);
+                    if (is_array($value)) {
+                        return $value;
                     }
+
+                    if (empty($value)) {
+                        return [];
+                    }
+
+                    $value = preg_replace('/\s*,\s*/', ',', $value);
+                    return array_map('trim', explode(',', $value));
+                }
             ],
             'password' => [
                 'name' => __('filament-general-settings::types.password'),
                 'rules' => 'required|string|min:4',
                 'prepareForUse' => function ($value) {
-                        $isEncrypted = Config::get('filament-general-settings.encryption.enabled');
+                    if (Config::get('filament-general-settings.encryption.enabled')) {
                         $encryption = new EncryptionService();
-                        return $isEncrypted
-                            ? $encryption->decrypt($value)
-                            : $value;
+                        return $encryption->decrypt($value);
                     }
+                    return $value;
+                }
             ]
         ];
+    }
+
+    public function castForStorage($value, string $type)
+    {
+        if (is_null($value)) {
+            return null;
+        }
+
+        return match ($type) {
+            'string' => (string) $value,
+            'integer' => (int) $value,
+            'float' => (float) $value,
+            'boolean' => (bool) $value,
+            'array' => is_array($value) ? implode(',', $value) : $value,
+            'json' => is_array($value) ? json_encode($value) : $value,
+            'date' => $value,
+            'time' => $value,
+            'datetime' => $value,
+            'url' => $value,
+            'email' => $value,
+            'emails' => is_array($value) ? implode(',', $value) : $value,
+            'password' => $value, // La encriptación se maneja en el modelo
+            default => $value,
+        };
     }
 }

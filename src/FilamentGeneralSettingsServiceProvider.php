@@ -2,34 +2,30 @@
 
 namespace Josefo727\FilamentGeneralSettings;
 
-use Illuminate\Support\ServiceProvider;
+use Spatie\LaravelPackageTools\Exceptions\InvalidPackage;
+use Spatie\LaravelPackageTools\Package;
+use Spatie\LaravelPackageTools\PackageServiceProvider;
 use Josefo727\FilamentGeneralSettings\Commands\InstallCommand;
 
-class FilamentGeneralSettingsServiceProvider extends ServiceProvider
+class FilamentGeneralSettingsServiceProvider extends PackageServiceProvider
 {
-    public function boot(): void
+    public function configurePackage(Package $package): void
     {
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'filament-general-settings');
-
-        $this->publishes([
-            __DIR__ . '/../config/filament-general-settings.php' => config_path('filament-general-settings.php'),
-        ], 'filament-general-settings-config');
-
-        $this->publishes([
-            __DIR__ . '/../lang' => lang_path('vendor/filament-general-settings'),
-        ], 'filament-general-settings-translations');
-
-        // Register the command if we are using the application via the CLI
-        if ($this->app->runningInConsole()) {
-            $this->commands([
-                InstallCommand::class,
-            ]);
-        }
+        $package
+            ->name('filament-general-settings')
+            ->hasConfigFile()
+            ->hasTranslations()
+            ->hasCommand(InstallCommand::class)
+            ->hasMigration('create_general_settings_table');
     }
 
-    public function register(): void
+    /**
+     * @return void
+     * @throws InvalidPackage
+     */
+    public function register()
     {
+        parent::register();
         // Merge config
         $this->mergeConfigFrom(
             __DIR__ . '/../config/filament-general-settings.php',
@@ -43,8 +39,22 @@ class FilamentGeneralSettingsServiceProvider extends ServiceProvider
     }
 
     /**
-     * Get the table name with prefix if configured.
-     *
+     * @return void
+     */
+    public function boot(): void
+    {
+        parent::boot();
+
+        // Cargar traducciones explícitamente
+        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'filament-general-settings');
+
+        // Publicar traducciones
+        $this->publishes([
+            __DIR__ . '/../lang' => lang_path('vendor/filament-general-settings'),
+        ], 'filament-general-settings-translations');
+    }
+
+    /**
      * @return string
      */
     public static function getTableName(): string
