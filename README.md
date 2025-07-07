@@ -1,5 +1,8 @@
 # Filament General Settings
 
+[![English](https://img.shields.io/badge/lang-English-blue.svg)](README.md)
+[![Español](https://img.shields.io/badge/lang-Español-red.svg)](README.es.md)
+
 A Filament plugin for managing general settings in a Laravel application.
 
 ## Features
