@@ -136,6 +136,12 @@ $value = GeneralSetting::getValue('setting_name');
 // Get a setting value with a default
 $value = GeneralSetting::getValue('setting_name', 'default_value');
 
+// Using the helper function to get a setting value
+$value = getSetting('setting_name');
+
+// Using the helper function to get a setting value with a default
+$value = getSetting('setting_name', 'default_value');
+
 // Check if a setting exists
 if (GeneralSetting::has('setting_name')) {
     // Do something
