@@ -1,6 +1,6 @@
 <?php
 
-if (!function_exists('setting')) {
+if (!function_exists('getSetting')) {
     /**
      * @param string $key
      * @param mixed|null $default
