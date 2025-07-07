@@ -208,9 +208,7 @@ class GeneralSetting extends Model
      */
     public static function has(string $name): bool
     {
-        $setting = static::query()->firstWhere('name', '=', $name);
-
-        return !!$setting;
+        return static::query()->where('name', '=', $name)->exists();
     }
 
     /**
