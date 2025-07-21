@@ -7,7 +7,7 @@
     "authors": [
         {
             "name": "Josefo727",
-            "email": "josefo727@example.com"
+            "email": "josefo727@gmail.com"
         }
     ],
     "require": {
@@ -51,7 +51,7 @@
         "test": "vendor/bin/phpunit",
         "test-coverage": "vendor/bin/phpunit --coverage-html coverage",
         "format": "vendor/bin/pint"
-    }
+    },
     "config": {
         "sort-packages": true
     },
