@@ -6,6 +6,7 @@ composer.lock
 
 # PHPUnit files
 .phpunit.result.cache
+phpunit.xml
 
 # Configuration files for your editor/IDE (PhpStorm, Visual Studio Code, etc.)
 .idea/

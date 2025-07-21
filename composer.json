@@ -17,7 +17,10 @@
         "spatie/laravel-package-tools": "^1.16"
     },
     "require-dev": {
+        "laravel/pint": "^1.24",
+        "nunomaduro/larastan": "^2.11",
         "orchestra/testbench": "^8.0",
+        "phpstan/phpstan": "^1.12",
         "phpunit/phpunit": "^10.0"
     },
     "autoload": {
@@ -40,6 +43,15 @@
             ]
         }
     },
+    "scripts": {
+        "post-autoload-dump": [
+            "@php ./vendor/bin/testbench package:discover --ansi"
+        ],
+        "analyse": "vendor/bin/phpstan analyse",
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-html coverage",
+        "format": "vendor/bin/pint"
+    }
     "config": {
         "sort-packages": true
     },
