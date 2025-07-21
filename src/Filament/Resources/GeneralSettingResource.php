@@ -17,8 +17,6 @@ class GeneralSettingResource extends Resource
 {
     protected static ?string $model = GeneralSetting::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-cog';
-
     public static function getModelLabel(): string
     {
         return __('filament-general-settings::general.label_singular');
@@ -66,7 +64,7 @@ class GeneralSettingResource extends Resource
                     ->required()
                     ->reactive()
                     ->afterStateUpdated(function (Forms\Set $set) {
-                        // Limpiar el valor cuando cambia el tipo
+                        // Clear value when type changes
                         $set('value', '');
                     }),
 
@@ -75,7 +73,7 @@ class GeneralSettingResource extends Resource
                     ->maxLength(255)
                     ->columnSpanFull(),
 
-                // Campo dinámico para el valor según el tipo seleccionado
+                // Dynamic field for the value according to the selected type
                 Forms\Components\Group::make()
                     ->schema(function (Forms\Get $get) use ($dataTypeService) {
                         $type = $get('type');
@@ -237,7 +235,7 @@ class GeneralSettingResource extends Resource
                 Tables\Columns\TextColumn::make('valueForDisplay')
                     ->label(__('filament-general-settings::general.fields.value'))
                     ->formatStateUsing(function ($state) {
-                        // Asegurarse de que el valor sea una cadena
+                        // Ensuring that the value is a chain
                         if (is_array($state)) {
                             return json_encode($state);
                         }
