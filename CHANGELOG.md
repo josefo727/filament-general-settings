@@ -21,10 +21,23 @@ All notable changes to `filament-general-settings` will be documented in this fi
   - `phpstan/phpstan` from `^1.12` to `^2.0`
   - `phpunit/phpunit` from `^10.0` to `^11.0`
 
+### Fixed
+
+- Updated `GeneralSettingResource::form()` method signature to use `Schema` instead of `Form` (Filament 4 requirement)
+- Changed `->schema()` to `->components()` in form definition (Filament 4 API)
+- Fixed `FilamentUser` interface implementation: `canAccessFilament()` → `canAccessPanel()` in test User model
+- Configured PHPStan to handle Filament 4 type-hints correctly
+
+### Code Quality
+
+- Formatted entire codebase with Laravel Pint (28 files, 28 style issues fixed)
+- All tests passing (37/37, 132 assertions)
+- PHPStan level 5 analysis passing with no errors
+
 ### Notes
 
-- No code changes required - the plugin structure is fully compatible with Filament 4
-- All existing features and functionality remain unchanged
+- Minimal code changes required - plugin architecture remains the same
+- All existing features and functionality preserved
 - Users on Filament 3 should continue using v1.x
 
 ---
