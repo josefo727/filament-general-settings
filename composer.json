@@ -2,7 +2,7 @@
     "name": "josefo727/filament-general-settings",
     "description": "A Filament plugin for managing general settings in a Laravel application",
     "type": "library",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "license": "MIT",
     "authors": [
         {
@@ -13,7 +13,7 @@
     "require": {
         "php": "^8.2",
         "filament/filament": "^4.0",
-        "illuminate/support": "^11.28",
+        "illuminate/support": "^11.28|^12.0",
         "spatie/laravel-package-tools": "^1.16"
     },
     "require-dev": {
