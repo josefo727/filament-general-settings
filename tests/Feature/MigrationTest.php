@@ -58,7 +58,7 @@ class MigrationTest extends TestCase
         // Verificar que la tabla tiene las columnas esperadas
         $this->assertTrue(
             Schema::hasColumns('general_settings', [
-                'id', 'name', 'value', 'type', 'description', 'created_at', 'updated_at'
+                'id', 'name', 'value', 'type', 'description', 'created_at', 'updated_at',
             ]),
             'La tabla general_settings no tiene todas las columnas esperadas'
         );

@@ -11,8 +11,9 @@ class SqliteTest extends TestCase
     public function it_can_connect_to_database()
     {
         // Skip the test if PDO SQLite is not available
-        if (!extension_loaded('pdo_sqlite')) {
+        if (! extension_loaded('pdo_sqlite')) {
             $this->markTestSkipped('PDO SQLite extension is not loaded. Using alternative database driver.');
+
             return;
         }
 
@@ -36,7 +37,7 @@ class SqliteTest extends TestCase
             $this->assertEquals('test', $row['name']);
             $this->assertTrue(true, 'SQLite connection and operations successful');
         } catch (\Exception $e) {
-            $this->fail('SQLite connection failed: ' . $e->getMessage());
+            $this->fail('SQLite connection failed: '.$e->getMessage());
         }
     }
 }

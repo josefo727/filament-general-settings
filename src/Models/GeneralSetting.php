@@ -20,17 +20,15 @@ class GeneralSetting extends Model
         'name',
         'value',
         'description',
-        'type'
+        'type',
     ];
 
     protected $appends = [
-        'valueForDisplay'
+        'valueForDisplay',
     ];
 
     /**
      * Get the table name with prefix if configured.
-     *
-     * @return string
      */
     public function getTable(): string
     {
@@ -53,29 +51,22 @@ class GeneralSetting extends Model
     /**
      * Get validation rules for a setting.
      *
-     * @param mixed|null $type
-     * @param mixed|null $id
      * @return array<string,mixed>
      */
     public static function getValidationRules(mixed $type = null, mixed $id = null): array
     {
-        $dataType = new DataTypeService();
+        $dataType = new DataTypeService;
         $rules = $dataType->getValidationRule($type) ?: 'required';
         $tableName = FilamentGeneralSettingsServiceProvider::getTableName();
 
         return [
-            'name' => 'required|string|unique:' . $tableName . ',name,' . $id,
+            'name' => 'required|string|unique:'.$tableName.',name,'.$id,
             'value' => $rules,
             'description' => 'nullable|string',
-            'type' => 'required|string|in:' . $dataType->getListTypes(),
+            'type' => 'required|string|in:'.$dataType->getListTypes(),
         ];
     }
 
-    /**
-     * @param array $attributes
-     * @param int|null $id
-     * @return array
-     */
     private static function prepareAttributesForSaving(array $attributes, ?int $id = null): array
     {
         if (isset($attributes['type']) && in_array($attributes['type'], ['emails', 'array']) && isset($attributes['value'])) {
@@ -99,8 +90,7 @@ class GeneralSetting extends Model
     /**
      * Create a new setting.
      *
-     * @return GeneralSetting
-     * @param array<string,mixed> $attributes
+     * @param  array<string,mixed>  $attributes
      */
     public static function create(array $attributes = []): GeneralSetting
     {
@@ -116,10 +106,8 @@ class GeneralSetting extends Model
     /**
      * Update a setting.
      *
-     * @param GeneralSetting $setting
-     * @param array<string,mixed> $attributes
-     * @param array<string,mixed> $options
-     * @return GeneralSetting
+     * @param  array<string,mixed>  $attributes
+     * @param  array<string,mixed>  $options
      */
     public static function updateSetting(GeneralSetting $setting, array $attributes = [], array $options = []): GeneralSetting
     {
@@ -132,23 +120,19 @@ class GeneralSetting extends Model
 
     /**
      * Set the value of the setting, encrypting if necessary.
-     *
-     * @return void
      */
     public function setValue(): void
     {
         // Validate if the encryption configuration is enabled and if the type of value is password.
         if (Config::get('filament-general-settings.encryption.enabled') && $this->type === 'password') {
             // If so, we encrypt the value before saving it
-            $encryption = new EncryptionService();
+            $encryption = new EncryptionService;
             $this->value = $encryption->encrypt($this->value);
         }
     }
 
     /**
      * Get the value for display.
-     *
-     * @return string
      */
     public function getValueForDisplayAttribute(): string
     {
@@ -157,12 +141,13 @@ class GeneralSetting extends Model
         }
 
         if ($this->type === 'password') {
-            if (!Config::get('filament-general-settings.show_passwords')) {
+            if (! Config::get('filament-general-settings.show_passwords')) {
                 return '********';
             }
 
             if (Config::get('filament-general-settings.encryption.enabled')) {
-                $dataType = new DataTypeService();
+                $dataType = new DataTypeService;
+
                 return $dataType->castForUse($this->value, 'password');
             }
         }
@@ -171,6 +156,7 @@ class GeneralSetting extends Model
             if (is_array($this->value)) {
                 return implode(', ', $this->value);
             }
+
             return $this->value;
         }
 
@@ -185,11 +171,9 @@ class GeneralSetting extends Model
     }
 
     /**
-     * @param string $name
-     * @param string|null $default
      * @return mixed|string|null
      */
-    public static function getValue(string $name, string $default = null): mixed
+    public static function getValue(string $name, ?string $default = null): mixed
     {
         $setting = static::query()->firstWhere('name', '=', $name);
 
@@ -197,47 +181,35 @@ class GeneralSetting extends Model
             return $default;
         }
 
-        $dataType = new DataTypeService();
+        $dataType = new DataTypeService;
 
         return $dataType->castForUse($setting->value, $setting->type);
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     */
     public static function has(string $name): bool
     {
         return static::query()->where('name', '=', $name)->exists();
     }
 
-    /**
-     * @param string $name
-     * @return bool
-     */
     public static function remove(string $name): bool
     {
         $setting = static::query()->firstWhere('name', '=', $name);
 
-        return !!optional($setting)->delete();
+        return (bool) optional($setting)->delete();
     }
 
     /**
      * Apply filters to the query.
-     *
-     * @param Builder $query
-     * @param Request $request
-     * @return Builder
      */
     public function scopeApplyFilters(Builder $query, Request $request): Builder
     {
-        return $query->when(!!$request->name, function ($query) use ($request) {
+        return $query->when((bool) $request->name, function ($query) use ($request) {
             $query->where('name', 'LIKE', "%$request->name%");
         })
-            ->when(!!$request->type, function ($query) use ($request) {
+            ->when((bool) $request->type, function ($query) use ($request) {
                 $query->where('type', $request->type);
             })
-            ->when(!!$request->value, function ($query) use ($request) {
+            ->when((bool) $request->value, function ($query) use ($request) {
                 $query->where('value', 'LIKE', "%$request->value%");
             });
     }

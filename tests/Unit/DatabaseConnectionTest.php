@@ -2,8 +2,8 @@
 
 namespace Josefo727\FilamentGeneralSettings\Tests\Unit;
 
-use Josefo727\FilamentGeneralSettings\Tests\TestCase;
 use Illuminate\Support\Facades\DB;
+use Josefo727\FilamentGeneralSettings\Tests\TestCase;
 
 class DatabaseConnectionTest extends TestCase
 {
@@ -12,15 +12,15 @@ class DatabaseConnectionTest extends TestCase
     {
         // Get the current driver
         $driver = config('database.connections.testing.driver');
-        
+
         // Output which driver we're using
         $this->addToAssertionCount(1);
-        
+
         try {
             DB::connection('testing')->getDatabaseName();
             $this->assertTrue(true, "Database connection with {$driver} driver successful");
         } catch (\Exception $e) {
-            $this->fail("Database connection with {$driver} driver failed: " . $e->getMessage());
+            $this->fail("Database connection with {$driver} driver failed: ".$e->getMessage());
         }
     }
 }

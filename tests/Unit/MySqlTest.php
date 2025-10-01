@@ -2,8 +2,8 @@
 
 namespace Josefo727\FilamentGeneralSettings\Tests\Unit;
 
-use Josefo727\FilamentGeneralSettings\Tests\TestCase;
 use Illuminate\Support\Facades\DB;
+use Josefo727\FilamentGeneralSettings\Tests\TestCase;
 
 class MySqlTest extends TestCase
 {
@@ -11,8 +11,9 @@ class MySqlTest extends TestCase
     public function it_can_connect_to_database()
     {
         // Skip the test if PDO MySQL is not available
-        if (!extension_loaded('pdo_mysql')) {
+        if (! extension_loaded('pdo_mysql')) {
             $this->markTestSkipped('PDO MySQL extension is not loaded. Using alternative database driver.');
+
             return;
         }
 
@@ -20,6 +21,7 @@ class MySqlTest extends TestCase
         $driver = config('database.connections.testing.driver');
         if ($driver !== 'mysql') {
             $this->markTestSkipped("Using {$driver} driver instead of mysql.");
+
             return;
         }
 
@@ -32,7 +34,7 @@ class MySqlTest extends TestCase
             $this->assertTrue(true, 'MySQL connection successful');
         } catch (\Exception $e) {
             // If we're running in an environment without MySQL, mark the test as skipped
-            $this->markTestSkipped('MySQL connection failed: ' . $e->getMessage());
+            $this->markTestSkipped('MySQL connection failed: '.$e->getMessage());
         }
     }
 }

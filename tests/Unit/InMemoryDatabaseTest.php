@@ -2,10 +2,10 @@
 
 namespace Josefo727\FilamentGeneralSettings\Tests\Unit;
 
-use Josefo727\FilamentGeneralSettings\Tests\TestCase;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
+use Josefo727\FilamentGeneralSettings\Tests\TestCase;
 
 class InMemoryDatabaseTest extends TestCase
 {
@@ -18,20 +18,20 @@ class InMemoryDatabaseTest extends TestCase
                 $table->id();
                 $table->string('name');
             });
-            
+
             // Insert a record
             DB::connection('testing')->table('test_table')->insert([
-                'name' => 'Test Record'
+                'name' => 'Test Record',
             ]);
-            
+
             // Retrieve the record
             $record = DB::connection('testing')->table('test_table')->first();
-            
+
             // Verify the record was inserted correctly
             $this->assertEquals('Test Record', $record->name);
             $this->assertTrue(true, 'In-memory database works for testing');
         } catch (\Exception $e) {
-            $this->fail('In-memory database failed: ' . $e->getMessage());
+            $this->fail('In-memory database failed: '.$e->getMessage());
         }
     }
 }

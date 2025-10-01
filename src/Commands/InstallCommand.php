@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 class InstallCommand extends Command
 {
     protected $signature = 'filament-general-settings:install';
+
     protected $description = 'Install the Filament General Settings package';
 
     public function handle(): int
