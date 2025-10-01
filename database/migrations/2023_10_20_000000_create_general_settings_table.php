@@ -30,7 +30,7 @@ return new class extends Migration
     public function down(): void
     {
         $tableName = FilamentGeneralSettingsServiceProvider::getTableName();
-        
+
         Schema::dropIfExists($tableName);
     }
 };

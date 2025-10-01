@@ -2,10 +2,10 @@
 
 namespace Josefo727\FilamentGeneralSettings;
 
+use Josefo727\FilamentGeneralSettings\Commands\InstallCommand;
 use Spatie\LaravelPackageTools\Exceptions\InvalidPackage;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
-use Josefo727\FilamentGeneralSettings\Commands\InstallCommand;
 
 class FilamentGeneralSettingsServiceProvider extends PackageServiceProvider
 {
@@ -21,6 +21,7 @@ class FilamentGeneralSettingsServiceProvider extends PackageServiceProvider
 
     /**
      * @return void
+     *
      * @throws InvalidPackage
      */
     public function register()
@@ -28,7 +29,7 @@ class FilamentGeneralSettingsServiceProvider extends PackageServiceProvider
         parent::register();
         // Merge config
         $this->mergeConfigFrom(
-            __DIR__ . '/../config/filament-general-settings.php',
+            __DIR__.'/../config/filament-general-settings.php',
             'filament-general-settings'
         );
 
@@ -38,30 +39,24 @@ class FilamentGeneralSettingsServiceProvider extends PackageServiceProvider
         });
     }
 
-    /**
-     * @return void
-     */
     public function boot(): void
     {
         parent::boot();
 
         // Cargar traducciones explícitamente
-        $this->loadTranslationsFrom(__DIR__ . '/../lang', 'filament-general-settings');
+        $this->loadTranslationsFrom(__DIR__.'/../lang', 'filament-general-settings');
 
         // Publicar traducciones
         $this->publishes([
-            __DIR__ . '/../lang' => lang_path('vendor/filament-general-settings'),
+            __DIR__.'/../lang' => lang_path('vendor/filament-general-settings'),
         ], 'filament-general-settings-translations');
     }
 
-    /**
-     * @return string
-     */
     public static function getTableName(): string
     {
         $prefix = config('filament-general-settings.table.prefix', '');
         $name = config('filament-general-settings.table.name', 'general_settings');
 
-        return $prefix ? $prefix . '_' . $name : $name;
+        return $prefix ? $prefix.'_'.$name : $name;
     }
 }

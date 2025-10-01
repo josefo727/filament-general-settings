@@ -12,11 +12,11 @@ class FilamentGeneralSettings
     {
         $this->modelClass = config('filament-general-settings.model', GeneralSetting::class);
     }
+
     /**
      * Get a setting value by name.
      *
-     * @param string $name
-     * @param mixed $default
+     * @param  mixed  $default
      * @return mixed
      */
     public function get(string $name, $default = null)
@@ -27,16 +27,13 @@ class FilamentGeneralSettings
     /**
      * Set a setting value.
      *
-     * @param string $name
-     * @param mixed $value
-     * @param string|null $type
-     * @param string|null $description
+     * @param  mixed  $value
      * @return GeneralSetting
      */
     public function set(string $name, $value, ?string $type = 'string', ?string $description = null)
     {
         $setting = $this->modelClass::query()->firstWhere('name', $name);
-        
+
         if ($setting) {
             return $this->modelClass::updateSetting($setting, [
                 'value' => $value,
@@ -44,7 +41,7 @@ class FilamentGeneralSettings
                 'description' => $description ?? $setting->description,
             ]);
         }
-        
+
         return $this->modelClass::create([
             'name' => $name,
             'value' => $value,
@@ -55,9 +52,6 @@ class FilamentGeneralSettings
 
     /**
      * Check if a setting exists.
-     *
-     * @param string $name
-     * @return bool
      */
     public function has(string $name): bool
     {
@@ -66,18 +60,15 @@ class FilamentGeneralSettings
 
     /**
      * Remove a setting.
-     *
-     * @param string $name
-     * @return bool
      */
     public function remove(string $name): bool
     {
         $setting = $this->modelClass::query()->firstWhere('name', $name);
-        
+
         if ($setting) {
             return $setting->delete();
         }
-        
+
         return false;
     }
 }

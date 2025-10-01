@@ -2,16 +2,12 @@
 
 namespace Josefo727\FilamentGeneralSettings\Services;
 
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Crypt;
 
 class EncryptionService
 {
     /**
      * Encrypt a value.
-     *
-     * @param string $value
-     * @return string
      */
     public function encrypt(string $value): string
     {
@@ -20,9 +16,6 @@ class EncryptionService
 
     /**
      * Decrypt a value.
-     *
-     * @param string $value
-     * @return string
      */
     public function decrypt(string $value): string
     {

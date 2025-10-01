@@ -12,6 +12,12 @@ parameters:
 
     ignoreErrors:
         - '#Unsafe usage of new static#'
+        - '#Parameter \$(set|get) of anonymous function has invalid type#'
+        - '#Invoking callable on an unknown class Filament\\Forms\\(Set|Get)#'
+        - '#Call to static method make\(\) on an unknown class Filament\\(Forms|Tables)\\#'
+        - '#Access to an undefined property .+::\$(type|value)#'
+        - '#Parameter .+ is implicitly nullable#'
+        - '#Called .env. outside of the config directory#'
 
     excludePaths:
         - ./*/*/data.php

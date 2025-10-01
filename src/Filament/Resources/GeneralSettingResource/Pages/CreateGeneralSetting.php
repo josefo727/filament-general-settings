@@ -2,8 +2,8 @@
 
 namespace Josefo727\FilamentGeneralSettings\Filament\Resources\GeneralSettingResource\Pages;
 
-use Josefo727\FilamentGeneralSettings\Filament\Resources\GeneralSettingResource;
 use Filament\Resources\Pages\CreateRecord;
+use Josefo727\FilamentGeneralSettings\Filament\Resources\GeneralSettingResource;
 
 class CreateGeneralSetting extends CreateRecord
 {

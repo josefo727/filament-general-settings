@@ -305,7 +305,7 @@ class FormValidationTest extends TestCase
     /** @test */
     public function it_uses_data_type_service_validation_rules()
     {
-        $dataTypeService = new DataTypeService();
+        $dataTypeService = new DataTypeService;
 
         // Obtener todos los tipos
         $types = $dataTypeService->getTypes();
@@ -324,25 +324,25 @@ class FormValidationTest extends TestCase
 
             // Validar con un valor válido
             $validator = Validator::make([
-                'name' => 'test_' . $type,
+                'name' => 'test_'.$type,
                 'type' => $type,
                 'value' => $value,
-                'description' => 'Test ' . $type,
+                'description' => 'Test '.$type,
             ], $rules);
 
             $this->assertFalse($validator->fails(), "La validación para el tipo '$type' con valor '$value' no debería fallar");
 
             // Crear un setting con este tipo
             $setting = GeneralSetting::create([
-                'name' => 'test_' . $type,
+                'name' => 'test_'.$type,
                 'type' => $type,
                 'value' => $value,
-                'description' => 'Test ' . $type,
+                'description' => 'Test '.$type,
             ]);
 
             // Verificar que se creó correctamente
             $this->assertDatabaseHas(\Josefo727\FilamentGeneralSettings\FilamentGeneralSettingsServiceProvider::getTableName(), [
-                'name' => 'test_' . $type,
+                'name' => 'test_'.$type,
                 'type' => $type,
             ]);
         }
@@ -460,7 +460,7 @@ class FormValidationTest extends TestCase
             'description' => 'Test description',
         ], $rules);
 
-        $this->assertTrue($validator->fails(), "Un valor no booleano debería fallar la validación");
+        $this->assertTrue($validator->fails(), 'Un valor no booleano debería fallar la validación');
         $this->assertTrue($validator->errors()->has('value'), 'Debería tener un error en el campo value');
 
         // Crear un setting con un valor booleano válido

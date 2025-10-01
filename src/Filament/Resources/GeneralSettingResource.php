@@ -4,14 +4,14 @@ namespace Josefo727\FilamentGeneralSettings\Filament\Resources;
 
 use Carbon\Carbon;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Illuminate\Support\HtmlString;
 use Josefo727\FilamentGeneralSettings\Filament\Resources\GeneralSettingResource\Pages;
 use Josefo727\FilamentGeneralSettings\Models\GeneralSetting;
 use Josefo727\FilamentGeneralSettings\Services\DataTypeService;
-use Illuminate\Support\HtmlString;
 
 class GeneralSettingResource extends Resource
 {
@@ -47,12 +47,12 @@ class GeneralSettingResource extends Resource
         return config('filament-general-settings.navigation.sort', 1);
     }
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        $dataTypeService = new DataTypeService();
+        $dataTypeService = new DataTypeService;
 
-        return $form
-            ->schema([
+        return $schema
+            ->components([
                 Forms\Components\TextInput::make('name')
                     ->label(__('filament-general-settings::general.fields.name'))
                     ->required()
@@ -82,7 +82,7 @@ class GeneralSettingResource extends Resource
                             return [
                                 Forms\Components\Textarea::make('value')
                                     ->label(__('filament-general-settings::general.fields.value'))
-                                    ->required()
+                                    ->required(),
                             ];
                         }
 
@@ -97,7 +97,7 @@ class GeneralSettingResource extends Resource
                                 Forms\Components\Textarea::make('value')
                                     ->label(__('filament-general-settings::general.fields.value'))
                                     ->rules($rulesArray)
-                                    ->helperText('Any plain text')
+                                    ->helperText('Any plain text'),
                             ],
                             'integer' => [
                                 Forms\Components\TextInput::make('value')
@@ -105,14 +105,14 @@ class GeneralSettingResource extends Resource
                                     ->numeric()
                                     ->integer()
                                     ->rules($rulesArray)
-                                    ->helperText('35')
+                                    ->helperText('35'),
                             ],
                             'float' => [
                                 Forms\Components\TextInput::make('value')
                                     ->label(__('filament-general-settings::general.fields.value'))
                                     ->numeric()
                                     ->rules($rulesArray)
-                                    ->helperText('35.25')
+                                    ->helperText('35.25'),
                             ],
                             'boolean' => [
                                 Forms\Components\Toggle::make('value')
@@ -125,37 +125,40 @@ class GeneralSettingResource extends Resource
                                         if (is_string($state)) {
                                             return in_array(strtolower($state), ['1', 'true', 'on', 'yes']);
                                         }
-                                        return (bool)$state;
-                                    })
+
+                                        return (bool) $state;
+                                    }),
                             ],
                             'array' => [
                                 Forms\Components\Textarea::make('value')
                                     ->label(__('filament-general-settings::general.fields.value'))
                                     ->rules($rulesArray)
                                     ->afterStateUpdated(function (Forms\Set $set, $state) {
-                                        if (!$state) return;
+                                        if (! $state) {
+                                            return;
+                                        }
                                         $set('value', preg_replace('/\s*,\s*/', ',', trim($state)));
                                     })
-                                    ->helperText(new HtmlString('<span class="text-xs text-gray-500">value 01, value 02</span>'))
+                                    ->helperText(new HtmlString('<span class="text-xs text-gray-500">value 01, value 02</span>')),
                             ],
                             'json' => [
                                 Forms\Components\Textarea::make('value')
                                     ->label(__('filament-general-settings::general.fields.value'))
                                     ->rules($rulesArray)
-                                    ->helperText(new HtmlString('<span class="text-xs text-gray-500">{"clave": "valor"}</span>'))
+                                    ->helperText(new HtmlString('<span class="text-xs text-gray-500">{"clave": "valor"}</span>')),
                             ],
                             'date' => [
                                 Forms\Components\DatePicker::make('value')
                                     ->label(__('filament-general-settings::general.fields.value'))
                                     ->rules($rulesArray)
-                                    ->helperText('06/07/2025')
+                                    ->helperText('06/07/2025'),
                             ],
                             'time' => [
                                 Forms\Components\TimePicker::make('value')
                                     ->label(__('filament-general-settings::general.fields.value'))
                                     ->rules($rulesArray)
                                     ->seconds()
-                                    ->helperText('10:25:00 am')
+                                    ->helperText('10:25:00 am'),
                             ],
                             'datetime' => [
                                 Forms\Components\DateTimePicker::make('value')
@@ -164,24 +167,26 @@ class GeneralSettingResource extends Resource
                                     ->seconds()
                                     ->helperText('06/07/2025 10:25:00 am')
                                     ->afterStateUpdated(function (Forms\Set $set, $state) {
-                                        if (!$state) return;
+                                        if (! $state) {
+                                            return;
+                                        }
                                         $set('value', Carbon::parse($state)->format('Y-m-d H:i:s'));
                                     })
-                                    ->dehydrateStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('Y-m-d H:i:s') : null)
+                                    ->dehydrateStateUsing(fn ($state) => $state ? Carbon::parse($state)->format('Y-m-d H:i:s') : null),
                             ],
                             'url' => [
                                 Forms\Components\TextInput::make('value')
                                     ->label(__('filament-general-settings::general.fields.value'))
                                     ->rules($rulesArray)
                                     ->url()
-                                    ->helperText('https://example.com/path/to/resource?query=string#hash')
+                                    ->helperText('https://example.com/path/to/resource?query=string#hash'),
                             ],
                             'email' => [
                                 Forms\Components\TextInput::make('value')
                                     ->label(__('filament-general-settings::general.fields.value'))
                                     ->rules($rulesArray)
                                     ->email()
-                                    ->helperText('name@mail.com')
+                                    ->helperText('name@mail.com'),
                             ],
                             'emails' => [
                                 Forms\Components\Textarea::make('value')
@@ -189,11 +194,13 @@ class GeneralSettingResource extends Resource
                                     ->placeholder(__('filament-general-settings::types.emails'))
                                     ->rules($rulesArray)
                                     ->afterStateUpdated(function (Forms\Set $set, $state) {
-                                        if (!$state) return;
+                                        if (! $state) {
+                                            return;
+                                        }
                                         $set('value', preg_replace('/\s*,\s*/', ',', trim($state)));
                                     })
                                     ->dehydrateStateUsing(fn ($state) => $state ? preg_replace('/\s*,\s*/', ',', $state) : null)
-                                    ->helperText('name_1@mail.com,name_2@mail.com,name_3@mail.com')
+                                    ->helperText('name_1@mail.com,name_2@mail.com,name_3@mail.com'),
                             ],
                             'password' => [
                                 Forms\Components\TextInput::make('value')
@@ -206,12 +213,12 @@ class GeneralSettingResource extends Resource
                                         }
                                     })
                                     ->revealable()
-                                    ->helperText('Z&5G5WvTvrIviJ')
+                                    ->helperText('Z&5G5WvTvrIviJ'),
                             ],
                             default => [
                                 Forms\Components\Textarea::make('value')
                                     ->label(__('filament-general-settings::general.fields.value'))
-                                    ->rules($rulesArray)
+                                    ->rules($rulesArray),
                             ],
                         };
                     })
@@ -221,7 +228,7 @@ class GeneralSettingResource extends Resource
 
     public static function table(Table $table): Table
     {
-        $dataTypeService = new DataTypeService();
+        $dataTypeService = new DataTypeService;
 
         return $table
             ->columns([
@@ -239,6 +246,7 @@ class GeneralSettingResource extends Resource
                         if (is_array($state)) {
                             return json_encode($state);
                         }
+
                         return (string) $state;
                     })
                     ->searchable()

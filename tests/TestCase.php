@@ -2,20 +2,20 @@
 
 namespace Josefo727\FilamentGeneralSettings\Tests;
 
+use Filament\Actions\ActionsServiceProvider;
 use Filament\FilamentServiceProvider;
+use Filament\Forms\FormsServiceProvider;
+use Filament\Infolists\InfolistsServiceProvider;
+use Filament\Notifications\NotificationsServiceProvider;
+use Filament\Support\SupportServiceProvider;
+use Filament\Tables\TablesServiceProvider;
+use Filament\Widgets\WidgetsServiceProvider;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Josefo727\FilamentGeneralSettings\FilamentGeneralSettingsServiceProvider;
-use Orchestra\Testbench\TestCase as Orchestra;
-use Livewire\LivewireServiceProvider;
-use Filament\Support\SupportServiceProvider;
-use Filament\Forms\FormsServiceProvider;
-use Filament\Tables\TablesServiceProvider;
-use Filament\Notifications\NotificationsServiceProvider;
-use Filament\Actions\ActionsServiceProvider;
-use Filament\Infolists\InfolistsServiceProvider;
-use Filament\Widgets\WidgetsServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Josefo727\FilamentGeneralSettings\FilamentGeneralSettingsServiceProvider;
+use Livewire\LivewireServiceProvider;
+use Orchestra\Testbench\TestCase as Orchestra;
 
 class TestCase extends Orchestra
 {
@@ -26,7 +26,7 @@ class TestCase extends Orchestra
         parent::setUp();
 
         Factory::guessFactoryNamesUsing(
-            fn (string $modelName) => 'Josefo727\\FilamentGeneralSettings\\Tests\\Database\\Factories\\' . class_basename($modelName) . 'Factory'
+            fn (string $modelName) => 'Josefo727\\FilamentGeneralSettings\\Tests\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
     }
 
@@ -53,8 +53,8 @@ class TestCase extends Orchestra
     {
         // Configurar clave de aplicación para pruebas
         $app['config']->set('app.key', 'base64:'.base64_encode(
-                'KaPdSgVkxX2bPTygJO38wgVagNJiGU3U'
-            ));
+            'KaPdSgVkxX2bPTygJO38wgVagNJiGU3U'
+        ));
 
         config()->set('database.default', 'testing');
         config()->set('database.connections.testing', [
@@ -79,7 +79,7 @@ class TestCase extends Orchestra
      */
     protected function createGeneralSettingsTable()
     {
-        if (!Schema::hasTable('general_settings')) {
+        if (! Schema::hasTable('general_settings')) {
             Schema::create('general_settings', function ($table) {
                 $table->id();
                 $table->string('name')->unique();
@@ -96,6 +96,6 @@ class TestCase extends Orchestra
      */
     protected function defineDatabaseMigrations()
     {
-        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
+        $this->loadMigrationsFrom(__DIR__.'/database/migrations');
     }
 }
