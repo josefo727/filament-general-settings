@@ -16,9 +16,9 @@ Un plugin de Filament para gestionar configuraciones generales en una aplicació
 
 ## Requisitos
 
-- PHP 8.1 o superior
-- Laravel 10.0 o superior
-- Filament 3.0 o superior
+- PHP 8.2 o superior
+- Laravel 11.28 o superior
+- Filament 4.0 o superior
 
 ## Instalación
 
