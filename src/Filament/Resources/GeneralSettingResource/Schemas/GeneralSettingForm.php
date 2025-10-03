@@ -4,6 +4,9 @@ namespace Josefo727\FilamentGeneralSettings\Filament\Resources\GeneralSettingRes
 
 use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Schemas\Components\FusedGroup;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\HtmlString;
 use Josefo727\FilamentGeneralSettings\Services\DataTypeService;
@@ -26,7 +29,7 @@ class GeneralSettingForm
                     ->options($dataTypeService->getTypesForSelect())
                     ->required()
                     ->reactive()
-                    ->afterStateUpdated(function (Forms\Set $set) {
+                    ->afterStateUpdated(function (Set $set) {
                         // Clear value when type changes
                         $set('value', '');
                     }),
@@ -37,8 +40,8 @@ class GeneralSettingForm
                     ->columnSpanFull(),
 
                 // Dynamic field for the value according to the selected type
-                Forms\Components\Group::make()
-                    ->schema(function (Forms\Get $get) use ($dataTypeService) {
+                FusedGroup::make()
+                    ->schema(function (Get $get) use ($dataTypeService) {
                         $type = $get('type');
 
                         if (empty($type)) {
@@ -78,37 +81,36 @@ class GeneralSettingForm
                                     ->helperText('35.25'),
                             ],
                             'boolean' => [
-                                Forms\Components\Toggle::make('value')
+                                Forms\Components\ToggleButtons::make('value')
                                     ->label(__('filament-general-settings::general.fields.value'))
-                                    ->rules($rulesArray)
-                                    ->formatStateUsing(function ($state) {
-                                        if ($state === null) {
-                                            return false;
-                                        }
-                                        if (is_string($state)) {
-                                            return in_array(strtolower($state), ['1', 'true', 'on', 'yes']);
-                                        }
-
-                                        return (bool) $state;
-                                    }),
+                                    ->options([
+                                        '1' => 'True',
+                                        '0' => 'False',
+                                    ])
+                                    ->default('0')
+                                    ->inline()
+                                    ->required()
+                                    ->helperText('Select True or False'),
                             ],
                             'array' => [
                                 Forms\Components\Textarea::make('value')
                                     ->label(__('filament-general-settings::general.fields.value'))
                                     ->rules($rulesArray)
-                                    ->afterStateUpdated(function (Forms\Set $set, $state) {
+                                    ->afterStateUpdated(function (Set $set, $state) {
                                         if (! $state) {
                                             return;
                                         }
                                         $set('value', preg_replace('/\s*,\s*/', ',', trim($state)));
                                     })
-                                    ->helperText(new HtmlString('<span class="text-xs text-gray-500">value 01, value 02</span>')),
+                                    ->helperText(new HtmlString('<span class="text-xs text-gray-500">value 01, value 02</span>'))
+                                    ->rows(10),
                             ],
                             'json' => [
                                 Forms\Components\Textarea::make('value')
                                     ->label(__('filament-general-settings::general.fields.value'))
                                     ->rules($rulesArray)
-                                    ->helperText(new HtmlString('<span class="text-xs text-gray-500">{&quot;clave&quot;: &quot;valor&quot;}</span>')),
+                                    ->helperText(new HtmlString('<span class="text-xs text-gray-500">{&quot;clave&quot;: &quot;valor&quot;}</span>'))
+                                    ->rows(10),
                             ],
                             'date' => [
                                 Forms\Components\DatePicker::make('value')
@@ -129,7 +131,7 @@ class GeneralSettingForm
                                     ->rules($rulesArray)
                                     ->seconds()
                                     ->helperText('06/07/2025 10:25:00 am')
-                                    ->afterStateUpdated(function (Forms\Set $set, $state) {
+                                    ->afterStateUpdated(function (Set $set, $state) {
                                         if (! $state) {
                                             return;
                                         }
@@ -156,7 +158,7 @@ class GeneralSettingForm
                                     ->label(__('filament-general-settings::general.fields.value'))
                                     ->placeholder(__('filament-general-settings::types.emails'))
                                     ->rules($rulesArray)
-                                    ->afterStateUpdated(function (Forms\Set $set, $state) {
+                                    ->afterStateUpdated(function (Set $set, $state) {
                                         if (! $state) {
                                             return;
                                         }
